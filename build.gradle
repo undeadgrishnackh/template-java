@@ -1,0 +1,98 @@
+/*
+    Michele Brissoni (c) java template for the kata jumpstart project.
+ */
+
+plugins {
+    id 'idea' // optional (to generate IntelliJ IDEA project files)
+    id 'java'
+    id 'jacoco'
+    id 'checkstyle'
+    id "nebula.lint" version "16.23.0"
+    id "com.diffplug.spotless" version "5.12.5"
+    id "com.github.sherter.google-java-format" version "0.9"
+    id "com.adarshr.test-logger" version "3.0.0"
+    id "org.barfuin.gradle.jacocolog" version "1.2.4"
+}
+
+group 'org.undeadgrishnackh'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+/* JUNIT5 & Jacoco test coverage report*/
+dependencies {
+    implementation 'org.jetbrains:annotations:21.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+}
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled true
+        html.destination file("${buildDir}/reports/jacoco/html")
+    }
+    dependsOn test // tests are required to run before generating the report
+}
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+
+        rule {
+            enabled = false
+            element = 'CLASS'
+            includes = ['org.gradle.*']
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 0.3
+            }
+        }
+    }
+}
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses true
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+    logLevel 'lifecycle'
+}
+/* JUNIT5 & Jacoco test coverage report --------------------- END*/
+
+/* CheckStyle */
+checkstyle {
+    configFile = project(':').file("config/checkstyle/checkstyle.xml")
+    configProperties = ["suppressionFile" : project(':').file("config/checkstyle/suppressions.xml")]
+    toolVersion = "6.0"
+}
+tasks.withType(Checkstyle) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+/* CheckStyle --------------------- END*/
